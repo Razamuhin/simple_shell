@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 //#include "shellfuncts.h"
 
 // Set max length of command
@@ -15,7 +16,6 @@
 
 // Declare array to hold command line input
 char *args[MAX_LENGTH];
-
 
 // create - creates a new file
 // filename - the name of the file to be created
@@ -31,14 +31,17 @@ int create(char **filename){
 // text - text in each line
 int update(char **filename){
 	int n,numlines;
-	FILE *workfile;
+	//FILE *workfile;
 	numlines = atoi(filename[2]);
-	workfile = fopen(filename[1],"a");
-	for(n=0;n<numlines;n++){
-		fprintf( workfile, filename[3] );
-		fflush(workfile);
-	}
-	fclose(workfile);
+	printf("%s\n",filename[3]);
+	//for(n=3;n<numlines;n++){}
+	//workfile = fopen(filename[1],"a");
+	//for(n=0;n<numlines;n++){
+	//	fprintf( workfile, filename[3] );
+	//	fflush(workfile);
+	//}
+	//fclose(workfile);
+	return 0;
 }
 
 // list - displays contents of a file
@@ -61,21 +64,14 @@ int dir(){
 	return 0;
 }
 
-//
-
-// halt - exits the shell
-/*void halt(){
-	printf("Exiting...\n");
-	exit(EXIT_SUCCESS);
-}*/
-
+// Create arrays of commands and their addresses, to use when calling functions
 char *commands[] = { "create", "update", "list", "dir" };
-
 int (*cmd[]) (char **) = { &create, &update, &list, &dir };
 
 // parse_input - takes user input and breaks it into a matrix of arguments
 // *input - pointer to user input
-int *parse_input(char *input){
+int parse_input(char *input){
+	int bgcheck = 0;
 	// Replace newline at end of command with null character
 
 	input[strlen(input)-1] = '\0';
@@ -84,6 +80,7 @@ int *parse_input(char *input){
 
 	// split user input into matrix of arguments
 	char *arg = strtok(input," ");
+	printf("%s",input);
 	int i = 0;
 	while(arg != NULL){
 		args[i] = arg;
@@ -91,50 +88,37 @@ int *parse_input(char *input){
 		i++;
 	}
 	args[i] = NULL;
-	return 0;
+	// check whether last argument is '&', set bgcheck flag accordingly
+	if(strcmp(args[i-1],"&")==0){ bgcheck = 1; }
+	return bgcheck;
 }
 
-/*
-int exec_cmd(char *args){
-	int err_chk = 1;
-	pid_t pid, ppid;
-	// fork new process
-	pid = fork();
-	if (pid==0){
-		for(i=0;i<4;i++){
-			if (strcmp(args[0], commands[i]) == 0 ) {
-				err_chk = 0;
-				return (*cmd[i])(args);
-			}
-		}
-	} else {
-		ppid = wait(&status);
-
-	}
-	if(err_chk==1) {
-		printf("Invalid command!\n");
-	}
-}
-*/
-
-
-int exec_cmd(){
+// execute shell command
+// reference: https://stackoverflow.com/questions/8319484/regarding-background-processes-using-fork-and-child-processes-in-my-dummy-shel
+int exec_cmd(int bgcheck){
 	int i = 0;
 	int err_chk = 1;
-	if (args[0] == NULL) {
-		printf("No command given\n");
-	} else {
+	int status;
+	pid_t pid;
+	pid = fork();
+	if (pid==0) {
+		if(bgcheck=1){
+			setpgid(0,0);
+		}
 		for(i=0;i<4;i++){
 			if (strcmp(args[0], commands[i]) == 0 ) {
+				printf("Starting child process %s with pid %d\n",args[0],getpid());
 				err_chk = 0;
 				return (*cmd[i])(args);
-				//int selection = i;
-				printf("%s\n",args[0]);
-			} else { }
+				exit(EXIT_SUCCESS);
+			}
 		}
 		if (err_chk == 1) {
 			fprintf(stderr,"Command not recognized!\n");
-		} else { }
+		}
+	} else {
+		//hanging! fix this
+		wait(&status);
 	}
 	return 0;
 }
@@ -144,7 +128,9 @@ int main(void){
 	// https://stackoverflow.com/questions/1247989/how-do-you-allow-spaces-to-be-entered-using-scanf
 	// https://brennan.io/2015/01/16/write-a-shell-in-c/
 	// Allocate memory for user arguments, and exit gracefully if no memory is available.
-	char *input = malloc(MAX_LENGTH * sizeof(char*));
+	char input[MAX_LENGTH];
+	int bgcheck;
+	//char *input = malloc(MAX_LENGTH * sizeof(char*));
 
 	if(input == NULL){
 		fprintf(stderr,"Out of memory - please download additional RAM\n");
@@ -161,16 +147,17 @@ int main(void){
 		// shell prompt
 		printf("wash> ");
 		fgets(input, MAX_LENGTH, stdin);
+		printf("%s\n",input);
 		//fflush(stdout);
 		// parse command
-		parse_input(input);
-		// if command is halt, exit the program
-		if (strcmp(args[0], "halt") == 0) {
+		bgcheck = parse_input(input);
+		if (args[0] == NULL) {												// if no text recieved, print error
+			fprintf(stderr,"No command received\n");
+		} else if (strcmp(args[0], "halt") == 0) {		// if command is halt, exit shell
 			cont = 0;
 		} else {
-			// fork new process
-			exec_cmd(*args);
-			//return (args[0])(args);
+			// fork and execute new process
+			exec_cmd(bgcheck);
 		}
 
 		// fork() child process to execute command
