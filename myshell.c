@@ -32,7 +32,6 @@ int parse_input(char *input){
 			args[i] = buffer;
 		}
 		args[i+1] = strtok(NULL," ");
-		args[i+2] = NULL;
 		printf("Argument %d: '%s'\n",i,args[i]);
 		i++;
 	}
