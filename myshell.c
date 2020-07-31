@@ -19,53 +19,6 @@ char *args[MAX_LENGTH];
 
 // parse_input - takes user input and breaks it into a matrix of arguments
 // *input - pointer to user input
-/*
-int parse_input(char *input){
-	int bgcheck = 0;
-	// Replace newline at end of command with null character
-	input[strlen(input)-1] = '\0';
-	// test print
-	// printf("%s\n",input);
-
-	// split user input into matrix of arguments
-
-	char *arg = strtok(input," ");
-	int i = 0;
-	while(arg != NULL){
-		args[i] = arg;
-		arg = strtok(NULL," ");
-		i++;
-	}
-	args[i] = NULL;
-	// check whether last argument is '&', set bgcheck flag accordingly
-	if(args[0] != NULL && strcmp(args[i-1],"&")==0){ bgcheck = 1; }
-	return bgcheck;
-}
-*/
-/*int parse_input(char *input){
-	int bgcheck = 0, i = 0;
-	input[strlen(input)-1] = '\0';
-	char *arg = strtok(input," ");
-	//args[0] = strtok(input," ");
-	while(arg != NULL){
-		if(*arg=='"'){
-			arg++;
-			char *tmp = strtok(NULL,"\"");
-			char buffer[100];
-			snprintf(buffer, 100, "%s %s",arg, tmp);
-			arg = buffer;
-			printf("%s\n",arg);
-		}
-		args[i]=arg;
-		arg=strtok(NULL," ");
-		printf("Argument %d: '%s'\n",i,args[i]);
-		i++;
-	}
-	args[i]=NULL;
-	//printf("%s\n",args[3]);
-	if(args[0] != NULL && strcmp(args[i-1],"&")==0){ bgcheck = 1; }
-	return bgcheck;
-}*/
 int parse_input(char *input){
 	int bgcheck = 0, i = 0;
 	input[strlen(input)-1] = '\0';
@@ -79,6 +32,7 @@ int parse_input(char *input){
 			args[i] = buffer;
 		}
 		args[i+1] = strtok(NULL," ");
+		args[i+2] = NULL;
 		printf("Argument %d: '%s'\n",i,args[i]);
 		i++;
 	}
@@ -158,3 +112,51 @@ int main(void){
 
 	return 0;
 }
+
+/*
+int parse_input(char *input){
+	int bgcheck = 0;
+	// Replace newline at end of command with null character
+	input[strlen(input)-1] = '\0';
+	// test print
+	// printf("%s\n",input);
+
+	// split user input into matrix of arguments
+
+	char *arg = strtok(input," ");
+	int i = 0;
+	while(arg != NULL){
+		args[i] = arg;
+		arg = strtok(NULL," ");
+		i++;
+	}
+	args[i] = NULL;
+	// check whether last argument is '&', set bgcheck flag accordingly
+	if(args[0] != NULL && strcmp(args[i-1],"&")==0){ bgcheck = 1; }
+	return bgcheck;
+}
+*/
+/*int parse_input(char *input){
+	int bgcheck = 0, i = 0;
+	input[strlen(input)-1] = '\0';
+	char *arg = strtok(input," ");
+	//args[0] = strtok(input," ");
+	while(arg != NULL){
+		if(*arg=='"'){
+			arg++;
+			char *tmp = strtok(NULL,"\"");
+			char buffer[100];
+			snprintf(buffer, 100, "%s %s",arg, tmp);
+			arg = buffer;
+			printf("%s\n",arg);
+		}
+		args[i]=arg;
+		arg=strtok(NULL," ");
+		printf("Argument %d: '%s'\n",i,args[i]);
+		i++;
+	}
+	args[i]=NULL;
+	//printf("%s\n",args[3]);
+	if(args[0] != NULL && strcmp(args[i-1],"&")==0){ bgcheck = 1; }
+	return bgcheck;
+}*/
