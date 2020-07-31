@@ -10,32 +10,37 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+
 // create - creates a new file
 // filename - the name of the file to be created
-int create(char **filename){
+int create(char **arguments){
 	FILE *newfile;
-	newfile = fopen(filename[1],"w");
+	newfile = fopen(arguments[1],"w");
+	//check for leading whitespace
 	fclose(newfile);
+	return 0;
 }
 
 // update - appends lines of text to a file
 // filename - the name of the target file
 // numlines - number of lines to add
 // text - text in each line
-int update(char **filename){
+int update(char **arguments){
 	int numlines;
-	int n = 0;
 	//FILE *workfile;
-	numlines = atoi(filename[2]);
-	while(filename[n]!=NULL){
-		printf("%s",filename[n]);
+	numlines = atoi(arguments[2]);
+	printf("Number of lines: %d\n", numlines);
+	/*while(arguments[n]!=NULL){
+		printf("%s",arguments[n]);
 		n++;
-	}
-	//printf("%s\n",filename[3]);
+		// while not null or quote, use a simple if statement
+	}*/
+	printf("%s\n",arguments[3]);
+	//printf("%s\n",arguments[3]);
 	//for(n=3;n<numlines;n++){}
-	//workfile = fopen(filename[1],"a");
+	//workfile = fopen(arguments[1],"a");
 	//for(n=0;n<numlines;n++){
-	//	fprintf( workfile, filename[3] );
+	//	fprintf( workfile, arguments[3] );
 	//	fflush(workfile);
 	//}
 	//fclose(workfile);
@@ -44,16 +49,16 @@ int update(char **filename){
 
 // list - displays contents of a file
 //		Parameters:
-// 			filename - the name of the target file
+// 			arguments - the name of the target file
 //		Maximum file size: 1MB
-int list(char **filename){
+int list(char **arguments){
 	FILE *readfile;
-	char *filebuffer = malloc(1048576 * sizeof(char));
-	readfile = fopen(filename[1],"r");
-	snprintf(filebuffer,(1048576 * sizeof(char)) - 1,"cat %s",filename[1]);
-	system(filebuffer);
-	free(filebuffer);
+	char filebuffer[10000];
+	readfile = fopen(arguments[1],"r");
+	//if fopen(...) == NULL -> return error
 	fclose(readfile);
+	snprintf(filebuffer,9999,"%s",arguments[1]);
+	execl("/bin/cat","cat",filebuffer,NULL);
 	return 0;
 }
 
