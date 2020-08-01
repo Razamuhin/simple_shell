@@ -19,18 +19,16 @@ int create(char **arguments){
 	} else {
 		FILE *newfile;
 		newfile = fopen(arguments[1],"w");
-		//check for leading whitespace
+		// Check for leading whitespace
 		fclose(newfile);
 	}
 	exit(0);
 }
 
 // update - appends lines of text to a file
-// filename - the name of the target file
-// numlines - number of lines to add
-// text - text in each line
 int update(char **arguments){
 	int numlines, n;
+	// Check whether file exists
 	if(fopen(arguments[1],"r")==NULL){
 		fprintf(stderr,"[ERROR]: File '%s' not found!\n",arguments[1]);
 	} else {
@@ -49,11 +47,9 @@ int update(char **arguments){
 }
 
 // list - displays contents of a file
-//		Parameters:
-// 			arguments - the name of the target file
-//		Maximum file size: 1MB
 int list(char **arguments){
 	char filebuffer[100];
+	// Check whether file exists
 	if(fopen(arguments[1],"r")==NULL){
 		fprintf(stderr, "File '%s' not found!\n",arguments[1]);
 	} else {
@@ -63,7 +59,7 @@ int list(char **arguments){
 	exit(0);
 }
 
-// dir - uses the Linux ls system builtin to list files in the current directory
+// dir - uses the Linux ls binary to list files in the current directory
 int dir(){
 	execl("/bin/ls","ls",NULL);
 	exit(0);
