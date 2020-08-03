@@ -54,9 +54,11 @@ int exec_cmd(bool bgcheck){
 		// Compare first argument with list of available functions
 		while(commands[i]!=NULL){
 			if (strcmp(args[0], commands[i]) == 0 ) {
-				printf("Starting child process %s with pid %d\n",args[0],getpid());
 				err_chk = false;
-				return (*cmd[i])(args);									// Execute function with arguments
+				if(bgcheck){
+					freopen("/dev/null","w",stdout);				// Suppress output if process is run in background
+				}
+					return (*cmd[i])(args);									// Execute function with arguments
 			}
 			i++;
 		}
@@ -66,6 +68,8 @@ int exec_cmd(bool bgcheck){
 			exit(0);
 		}
 	} else {
+		printf("Starting child process %s with pid %d...\n",args[0],pid);
+		fflush(stdout);
 		if(!bgcheck){ waitpid(pid,&status,0); }
 	}
 	return 0;
